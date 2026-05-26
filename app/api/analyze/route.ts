@@ -81,13 +81,8 @@ REGLAS CRÍTICAS:
 Devolvé los datos en el formato estructurado solicitado.`;
 
 export async function POST(req: Request) {
-  if (!process.env.AI_GATEWAY_API_KEY) {
-    return NextResponse.json(
-      { error: "Falta configurar AI_GATEWAY_API_KEY en el servidor." },
-      { status: 500 },
-    );
-  }
-
+  // En Vercel, las funciones obtienen un OIDC token automáticamente para
+  // autenticar contra AI Gateway, así que la API key solo es necesaria en local.
   const ip = getClientIp(req);
   const rl = rateLimit(ip);
   if (!rl.ok) {
