@@ -17,10 +17,24 @@ export function Resultado({
 }) {
   const sinSellos =
     resultado.octogonos.length === 0 && resultado.leyendas.length === 0;
+  const exencion = resultado.exencion;
 
   return (
     <section className="flex flex-col gap-6 w-full">
-      {sinSellos ? (
+      {exencion ? (
+        <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-6 text-center">
+          <div className="text-3xl">⚖</div>
+          <p className="mt-2 font-semibold text-lg text-blue-900">
+            Producto EXENTO del etiquetado frontal
+          </p>
+          <p className="text-sm text-blue-800 mt-2 leading-relaxed">
+            {exencion.motivo}
+          </p>
+          <p className="text-[11px] text-blue-700 mt-3 italic">
+            Fundamento legal: {exencion.articulo}
+          </p>
+        </div>
+      ) : sinSellos ? (
         <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center">
           <div className="text-3xl">✓</div>
           <p className="mt-2 font-semibold text-lg">
