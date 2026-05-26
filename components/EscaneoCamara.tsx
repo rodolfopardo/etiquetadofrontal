@@ -8,34 +8,60 @@ import type {
   ResultadoCalculo,
 } from "@/lib/octogonos";
 
+type ProductoInfo = {
+  marca?: string;
+  nombre?: string;
+  reclamos?: string[];
+};
+
 type RespuestaAPI = {
+  producto?: ProductoInfo;
   datos: DatosNutricionales;
   resultado: ResultadoCalculo;
   notas?: string;
   porPorcionUnicamente?: boolean;
 };
 
+type Paso = "frente" | "tabla" | "procesando" | "ok" | "error";
+
 export function EscaneoCamara() {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [estado, setEstado] = useState<"idle" | "procesando" | "ok" | "error">(
-    "idle",
-  );
+  const inputFrenteRef = useRef<HTMLInputElement>(null);
+  const inputTablaRef = useRef<HTMLInputElement>(null);
+
+  const [paso, setPaso] = useState<Paso>("frente");
+  const [previewFrente, setPreviewFrente] = useState<string | null>(null);
+  const [previewTabla, setPreviewTabla] = useState<string | null>(null);
   const [respuesta, setRespuesta] = useState<RespuestaAPI | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleFile(file: File) {
+  async function tomarFotoFrente(file: File) {
     setError(null);
-    setRespuesta(null);
-    setEstado("procesando");
     try {
       const dataUrl = await compressImage(file);
-      setPreview(dataUrl);
+      setPreviewFrente(dataUrl);
+      setPaso("tabla");
+    } catch (e: unknown) {
+      const mensaje =
+        e instanceof Error ? e.message : "No se pudo procesar la foto";
+      setError(mensaje);
+      setPaso("error");
+    }
+  }
+
+  async function tomarFotoTablaYEnviar(file: File) {
+    setError(null);
+    setPaso("procesando");
+    try {
+      const dataUrlTabla = await compressImage(file);
+      setPreviewTabla(dataUrlTabla);
 
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ image: dataUrl }),
+        body: JSON.stringify({
+          frente: previewFrente ?? undefined,
+          tabla: dataUrlTabla,
+        }),
       });
 
       const json = await res.json();
@@ -43,70 +69,168 @@ export function EscaneoCamara() {
         throw new Error(json.error ?? "Error desconocido");
       }
       setRespuesta(json);
-      setEstado("ok");
+      setPaso("ok");
     } catch (e: unknown) {
       const mensaje = e instanceof Error ? e.message : "Algo salió mal";
       setError(mensaje);
-      setEstado("error");
+      setPaso("error");
     }
   }
 
   function reset() {
-    setPreview(null);
+    setPreviewFrente(null);
+    setPreviewTabla(null);
     setRespuesta(null);
     setError(null);
-    setEstado("idle");
-    if (inputRef.current) inputRef.current.value = "";
+    setPaso("frente");
+    if (inputFrenteRef.current) inputFrenteRef.current.value = "";
+    if (inputTablaRef.current) inputTablaRef.current.value = "";
+  }
+
+  function saltarFrente() {
+    setPaso("tabla");
   }
 
   return (
     <div className="flex flex-col gap-6 w-full">
       <input
-        ref={inputRef}
+        ref={inputFrenteRef}
         type="file"
         accept="image/*"
         capture="environment"
         className="sr-only"
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) void handleFile(f);
+          if (f) void tomarFotoFrente(f);
+        }}
+      />
+      <input
+        ref={inputTablaRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void tomarFotoTablaYEnviar(f);
         }}
       />
 
-      {estado === "idle" && (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="group relative w-full rounded-2xl border-2 border-dashed border-stone-300 bg-white px-6 py-16 text-center transition hover:border-stone-900 hover:bg-stone-50 active:scale-[0.99]"
-        >
-          <div className="text-5xl mb-3">📷</div>
-          <p className="text-lg font-semibold">Sacar foto de la tabla</p>
-          <p className="text-sm text-stone-500 mt-1">
-            Apuntá la cámara a la <strong>información nutricional</strong> del envase
-          </p>
-          <p className="text-xs text-stone-400 mt-4">
-            Tip: buena luz, tabla plana, columna por 100 g/ml visible
-          </p>
-        </button>
+      {/* Indicador de progreso */}
+      {(paso === "frente" || paso === "tabla") && (
+        <div className="flex items-center justify-center gap-2 text-xs text-stone-500">
+          <span
+            className={`size-2 rounded-full ${
+              paso === "frente" ? "bg-stone-900" : "bg-emerald-500"
+            }`}
+          />
+          <span>Frente</span>
+          <span className="w-6 h-px bg-stone-300" />
+          <span
+            className={`size-2 rounded-full ${
+              paso === "tabla" ? "bg-stone-900" : "bg-stone-300"
+            }`}
+          />
+          <span>Tabla nutricional</span>
+        </div>
       )}
 
-      {estado === "procesando" && (
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center">
-          {preview && (
-            <img
-              src={preview}
-              alt="Foto del producto"
-              className="mx-auto max-h-48 rounded-lg mb-4"
-            />
+      {/* PASO 1: frente */}
+      {paso === "frente" && (
+        <>
+          <button
+            type="button"
+            onClick={() => inputFrenteRef.current?.click()}
+            className="group relative w-full rounded-2xl border-2 border-dashed border-stone-300 bg-white px-6 py-14 text-center transition hover:border-stone-900 hover:bg-stone-50 active:scale-[0.99]"
+          >
+            <div className="text-5xl mb-3">📦</div>
+            <p className="text-lg font-semibold">Foto del frente del envase</p>
+            <p className="text-sm text-stone-500 mt-1">
+              Para identificar la marca y el producto
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={saltarFrente}
+            className="text-xs text-stone-500 underline self-center"
+          >
+            Saltar — no tengo el frente a mano
+          </button>
+        </>
+      )}
+
+      {/* PASO 2: tabla */}
+      {paso === "tabla" && (
+        <>
+          {previewFrente && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 flex items-center gap-3">
+              <img
+                src={previewFrente}
+                alt="Frente del envase"
+                className="size-16 rounded-lg object-cover"
+              />
+              <div className="text-xs">
+                <p className="font-medium text-emerald-900">
+                  Frente capturado ✓
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewFrente(null);
+                    setPaso("frente");
+                  }}
+                  className="text-emerald-700 underline mt-0.5"
+                >
+                  Volver a sacar
+                </button>
+              </div>
+            </div>
           )}
+          <button
+            type="button"
+            onClick={() => inputTablaRef.current?.click()}
+            className="group relative w-full rounded-2xl border-2 border-dashed border-stone-300 bg-white px-6 py-14 text-center transition hover:border-stone-900 hover:bg-stone-50 active:scale-[0.99]"
+          >
+            <div className="text-5xl mb-3">📋</div>
+            <p className="text-lg font-semibold">Foto de la tabla nutricional</p>
+            <p className="text-sm text-stone-500 mt-1">
+              Apuntá a la <strong>información nutricional</strong> del envase
+            </p>
+            <p className="text-xs text-stone-400 mt-3">
+              Tip: buena luz, tabla plana, columna por 100 g/ml visible
+            </p>
+          </button>
+        </>
+      )}
+
+      {/* Procesando */}
+      {paso === "procesando" && (
+        <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center">
+          <div className="flex gap-2 justify-center mb-3">
+            {previewFrente && (
+              <img
+                src={previewFrente}
+                alt="Frente"
+                className="h-24 rounded-lg"
+              />
+            )}
+            {previewTabla && (
+              <img
+                src={previewTabla}
+                alt="Tabla"
+                className="h-24 rounded-lg"
+              />
+            )}
+          </div>
           <div className="flex items-center justify-center gap-2 text-stone-600">
             <div className="size-2 rounded-full bg-stone-900 animate-pulse" />
-            <span className="text-sm">Leyendo la tabla nutricional…</span>
+            <span className="text-sm">Analizando el producto…</span>
           </div>
         </div>
       )}
 
-      {estado === "error" && (
+      {/* Error */}
+      {paso === "error" && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
           <p className="text-red-800 font-medium">{error}</p>
           <button
@@ -119,15 +243,9 @@ export function EscaneoCamara() {
         </div>
       )}
 
-      {estado === "ok" && respuesta && (
+      {/* OK */}
+      {paso === "ok" && respuesta && (
         <>
-          {preview && (
-            <img
-              src={preview}
-              alt="Foto analizada"
-              className="mx-auto max-h-40 rounded-lg"
-            />
-          )}
           <Resultado {...respuesta} />
           <button
             type="button"

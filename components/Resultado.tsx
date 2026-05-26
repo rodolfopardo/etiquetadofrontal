@@ -4,23 +4,59 @@ import type {
   ResultadoCalculo,
 } from "@/lib/octogonos";
 
+type ProductoInfo = {
+  marca?: string;
+  nombre?: string;
+  reclamos?: string[];
+};
+
 export function Resultado({
+  producto,
   datos,
   resultado,
   notas,
   porPorcionUnicamente,
 }: {
+  producto?: ProductoInfo;
   datos: DatosNutricionales;
   resultado: ResultadoCalculo;
   notas?: string;
   porPorcionUnicamente?: boolean;
 }) {
+  const tieneProducto = producto && (producto.marca || producto.nombre);
   const sinSellos =
     resultado.octogonos.length === 0 && resultado.leyendas.length === 0;
   const exencion = resultado.exencion;
 
   return (
     <section className="flex flex-col gap-6 w-full">
+      {tieneProducto && (
+        <header className="text-center">
+          {producto.marca && (
+            <p className="text-xs uppercase tracking-wider text-stone-500">
+              {producto.marca}
+            </p>
+          )}
+          {producto.nombre && (
+            <h2 className="mt-1 text-xl font-semibold tracking-tight">
+              {producto.nombre}
+            </h2>
+          )}
+          {producto.reclamos && producto.reclamos.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5 justify-center">
+              {producto.reclamos.slice(0, 4).map((r, i) => (
+                <span
+                  key={i}
+                  className="text-[10px] bg-stone-100 text-stone-600 rounded-full px-2 py-0.5"
+                >
+                  {r}
+                </span>
+              ))}
+            </div>
+          )}
+        </header>
+      )}
+
       {exencion ? (
         <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-6 text-center">
           <div className="text-3xl">⚖</div>
