@@ -118,20 +118,24 @@ export function EscaneoCamara() {
 
       {/* Indicador de progreso */}
       {(paso === "frente" || paso === "tabla") && (
-        <div className="flex items-center justify-center gap-2 text-xs text-stone-500">
+        <div className="flex items-center justify-center gap-2.5 text-[11px] uppercase tracking-[0.18em] text-stone-500">
           <span
             className={`size-2 rounded-full ${
               paso === "frente" ? "bg-stone-900" : "bg-emerald-500"
             }`}
           />
-          <span>Frente</span>
-          <span className="w-6 h-px bg-stone-300" />
+          <span className={paso === "frente" ? "text-stone-900" : ""}>
+            Frente
+          </span>
+          <span className="w-8 h-px bg-stone-300" />
           <span
             className={`size-2 rounded-full ${
               paso === "tabla" ? "bg-stone-900" : "bg-stone-300"
             }`}
           />
-          <span>Tabla nutricional</span>
+          <span className={paso === "tabla" ? "text-stone-900" : ""}>
+            Tabla
+          </span>
         </div>
       )}
 
@@ -141,18 +145,25 @@ export function EscaneoCamara() {
           <button
             type="button"
             onClick={() => inputFrenteRef.current?.click()}
-            className="group relative w-full rounded-2xl border-2 border-dashed border-stone-300 bg-white px-6 py-14 text-center transition hover:border-stone-900 hover:bg-stone-50 active:scale-[0.99]"
+            className="group relative w-full overflow-hidden rounded-3xl border border-[color:var(--color-line)] bg-white/80 backdrop-blur px-6 py-12 text-center transition hover:shadow-[0_18px_50px_-20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 active:scale-[0.99]"
           >
-            <div className="text-5xl mb-3">📦</div>
-            <p className="text-lg font-semibold">Foto del frente del envase</p>
-            <p className="text-sm text-stone-500 mt-1">
-              Para identificar la marca y el producto
-            </p>
+            <span className="pointer-events-none absolute inset-x-0 -top-24 h-48 bg-[radial-gradient(circle_at_center,rgba(255,210,120,0.35),transparent_70%)]" />
+            <div className="relative">
+              <div className="mx-auto mb-4 inline-flex items-center justify-center size-14 rounded-2xl bg-stone-900 text-white text-2xl">
+                📦
+              </div>
+              <p className="font-serif text-2xl leading-tight">
+                Foto del frente
+              </p>
+              <p className="text-sm text-stone-500 mt-2">
+                Para leer marca, producto y reclamos
+              </p>
+            </div>
           </button>
           <button
             type="button"
             onClick={saltarFrente}
-            className="text-xs text-stone-500 underline self-center"
+            className="text-xs text-stone-500 hover:text-stone-800 underline self-center"
           >
             Saltar — no tengo el frente a mano
           </button>
@@ -163,11 +174,11 @@ export function EscaneoCamara() {
       {paso === "tabla" && (
         <>
           {previewFrente && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 flex items-center gap-3">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 backdrop-blur p-3 flex items-center gap-3">
               <img
                 src={previewFrente}
                 alt="Frente del envase"
-                className="size-16 rounded-lg object-cover"
+                className="size-16 rounded-xl object-cover ring-1 ring-emerald-200"
               />
               <div className="text-xs">
                 <p className="font-medium text-emerald-900">
@@ -189,54 +200,61 @@ export function EscaneoCamara() {
           <button
             type="button"
             onClick={() => inputTablaRef.current?.click()}
-            className="group relative w-full rounded-2xl border-2 border-dashed border-stone-300 bg-white px-6 py-14 text-center transition hover:border-stone-900 hover:bg-stone-50 active:scale-[0.99]"
+            className="group relative w-full overflow-hidden rounded-3xl border border-[color:var(--color-line)] bg-white/80 backdrop-blur px-6 py-12 text-center transition hover:shadow-[0_18px_50px_-20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 active:scale-[0.99]"
           >
-            <div className="text-5xl mb-3">📋</div>
-            <p className="text-lg font-semibold">Foto de la tabla nutricional</p>
-            <p className="text-sm text-stone-500 mt-1">
-              Apuntá a la <strong>información nutricional</strong> del envase
-            </p>
-            <p className="text-xs text-stone-400 mt-3">
-              Tip: buena luz, tabla plana, columna por 100 g/ml visible
-            </p>
+            <span className="pointer-events-none absolute inset-x-0 -top-24 h-48 bg-[radial-gradient(circle_at_center,rgba(180,220,255,0.45),transparent_70%)]" />
+            <div className="relative">
+              <div className="mx-auto mb-4 inline-flex items-center justify-center size-14 rounded-2xl bg-stone-900 text-white text-2xl">
+                📋
+              </div>
+              <p className="font-serif text-2xl leading-tight">
+                Foto de la tabla
+              </p>
+              <p className="text-sm text-stone-500 mt-2">
+                Apuntá a la <strong>información nutricional</strong>
+              </p>
+              <p className="text-[11px] text-stone-400 mt-3">
+                Tip: buena luz, tabla plana, columna por 100 g/ml visible
+              </p>
+            </div>
           </button>
         </>
       )}
 
       {/* Procesando */}
       {paso === "procesando" && (
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center">
-          <div className="flex gap-2 justify-center mb-3">
+        <div className="rounded-3xl border border-[color:var(--color-line)] bg-white/80 backdrop-blur p-6 text-center">
+          <div className="flex gap-2 justify-center mb-4">
             {previewFrente && (
               <img
                 src={previewFrente}
                 alt="Frente"
-                className="h-24 rounded-lg"
+                className="h-24 rounded-xl ring-1 ring-stone-200"
               />
             )}
             {previewTabla && (
               <img
                 src={previewTabla}
                 alt="Tabla"
-                className="h-24 rounded-lg"
+                className="h-24 rounded-xl ring-1 ring-stone-200"
               />
             )}
           </div>
-          <div className="flex items-center justify-center gap-2 text-stone-600">
+          <div className="flex items-center justify-center gap-2 text-stone-700">
             <div className="size-2 rounded-full bg-stone-900 animate-pulse" />
-            <span className="text-sm">Analizando el producto…</span>
+            <span className="text-sm">Leyendo el envase…</span>
           </div>
         </div>
       )}
 
       {/* Error */}
       {paso === "error" && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+        <div className="rounded-3xl border border-red-200 bg-red-50/90 backdrop-blur p-6 text-center">
           <p className="text-red-800 font-medium">{error}</p>
           <button
             type="button"
             onClick={reset}
-            className="mt-4 rounded-lg bg-stone-900 px-4 py-2 text-white text-sm font-medium"
+            className="mt-4 rounded-full bg-stone-900 px-5 py-2.5 text-white text-sm font-medium hover:bg-stone-800 transition"
           >
             Probar de nuevo
           </button>
@@ -250,7 +268,7 @@ export function EscaneoCamara() {
           <button
             type="button"
             onClick={reset}
-            className="rounded-lg bg-stone-900 px-4 py-3 text-white text-sm font-medium"
+            className="rounded-full bg-stone-900 px-5 py-3 text-white text-sm font-medium hover:bg-stone-800 transition self-center"
           >
             Escanear otro producto
           </button>
