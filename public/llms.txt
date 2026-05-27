@@ -1,0 +1,29 @@
+# Etiquetado Frontal Argentina
+
+> Herramienta gratuita y de código abierto para escanear envases de alimentos en Argentina y conocer qué octógonos negros le corresponden según la Ley 27.642 de Promoción de la Alimentación Saludable y el Decreto Reglamentario 151/2022. El cálculo es determinista y se basa en los umbrales del perfil de nutrientes de la Organización Panamericana de la Salud (OPS), fase 2, vigentes desde agosto de 2024.
+
+La aplicación está pensada para que la ciudadanía argentina conserve acceso a información nutricional clara aunque cambien o se modifiquen las normas vigentes. El usuario saca una foto del frente del envase y otra de la tabla nutricional desde su celular; un modelo de visión por inteligencia artificial extrae los valores nutricionales y los datos del producto; el servidor calcula los octógonos aplicando los umbrales legales.
+
+## Sobre el etiquetado frontal argentino
+
+- **Ley 27.642**: sancionada en octubre de 2021, regula la rotulación de alimentos envasados con sellos de advertencia frontal.
+- **Decreto Reglamentario 151/2022**: define las exenciones (alimentos en su forma natural sin agregados críticos como leches, yogures naturales, quesos sin añadidos, aceites, frutas, verduras, carnes, huevos, sal, frutas secas, especias, fórmulas infantiles y alimentos para uso médico).
+- **Perfil OPS fase 2**: vigente desde agosto de 2024. Umbrales por 100 g (sólidos) o 100 ml (líquidos):
+  - Exceso de sodio: ≥ 1 mg de sodio por kcal.
+  - Exceso de azúcares libres: ≥ 10% del valor energético total.
+  - Exceso de grasas saturadas: ≥ 10% del valor energético total.
+  - Exceso de grasas totales: ≥ 30% del valor energético total.
+  - Exceso de calorías: ≥ 275 kcal/100 g (sólidos) o ≥ 70 kcal/100 ml (líquidos), si contienen azúcares o grasas añadidos.
+- **Leyendas complementarias**: "contiene edulcorantes, no recomendable en niños/as" y "contiene cafeína, evitar en niños/as".
+
+## Páginas
+
+- [Inicio](/): escanear un envase y ver los octógonos correspondientes.
+
+## Autor
+
+- Rodolfo Pardo — Argentina. Apoyo voluntario: https://cafecito.app/rodolofpardo
+
+## Licencia
+
+MIT. Código abierto. La app es una herramienta informativa y no reemplaza al etiquetado oficial del envase.
