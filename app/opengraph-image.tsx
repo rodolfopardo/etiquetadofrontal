@@ -94,7 +94,7 @@ export default async function OG() {
               flexWrap: "wrap",
             }}
           >
-            Sacale una foto y averiguá qué te estás comiendo.
+            Sacale una foto y averiguá qué estás comiendo.
           </div>
           <div
             style={{

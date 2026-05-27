@@ -11,7 +11,7 @@ export default function Home() {
           Ley 27.642 · Argentina
         </div>
         <h1 className="mt-5 font-serif text-5xl sm:text-6xl leading-[1.02] tracking-tight">
-          Sacale una foto y <em className="italic underline decoration-amber-400 decoration-[3px] underline-offset-[6px]">averiguá qué te estás comiendo</em>.
+          Sacale una foto y <em className="italic underline decoration-amber-400 decoration-[3px] underline-offset-[6px]">averiguá qué estás comiendo</em>.
         </h1>
         <p className="mt-5 text-stone-600 text-[15px] leading-relaxed max-w-md mx-auto">
           Subí la tabla nutricional de cualquier envase y la app calcula los
