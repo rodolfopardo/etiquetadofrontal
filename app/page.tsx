@@ -22,9 +22,9 @@ export default function Home() {
 
       <EscaneoCamara />
 
-      <FAQ />
-
       <Cafecito variant="card" />
+
+      <FAQ />
 
       <footer className="text-center text-xs text-stone-500 flex flex-col gap-3 items-center">
         <p className="max-w-sm leading-relaxed">
