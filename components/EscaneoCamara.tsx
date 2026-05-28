@@ -24,6 +24,24 @@ type RespuestaAPI = {
 
 type Paso = "frente" | "tabla" | "procesando" | "ok" | "error";
 
+// Formatos típicos de cámara móvil. HEIC/HEIF cubren iPhone.
+const ACCEPT_IMAGES = "image/jpeg,image/png,image/webp,image/heic,image/heif";
+
+// Ejecuta la transición de estado dentro de una View Transition del browser
+// cuando está disponible. Fallback silencioso en browsers que no la soportan
+// (Firefox a la fecha) — el cambio sigue aplicándose, solo sin animación.
+function withTransition(update: () => void) {
+  if (
+    typeof document !== "undefined" &&
+    "startViewTransition" in document &&
+    typeof document.startViewTransition === "function"
+  ) {
+    document.startViewTransition(update);
+  } else {
+    update();
+  }
+}
+
 export function EscaneoCamara() {
   const inputFrenteRef = useRef<HTMLInputElement>(null);
   const inputTablaRef = useRef<HTMLInputElement>(null);
@@ -38,19 +56,23 @@ export function EscaneoCamara() {
     setError(null);
     try {
       const dataUrl = await compressImage(file);
-      setPreviewFrente(dataUrl);
-      setPaso("tabla");
+      withTransition(() => {
+        setPreviewFrente(dataUrl);
+        setPaso("tabla");
+      });
     } catch (e: unknown) {
       const mensaje =
         e instanceof Error ? e.message : "No se pudo procesar la foto";
-      setError(mensaje);
-      setPaso("error");
+      withTransition(() => {
+        setError(mensaje);
+        setPaso("error");
+      });
     }
   }
 
   async function tomarFotoTablaYEnviar(file: File) {
     setError(null);
-    setPaso("procesando");
+    withTransition(() => setPaso("procesando"));
     try {
       const dataUrlTabla = await compressImage(file);
       setPreviewTabla(dataUrlTabla);
@@ -68,37 +90,47 @@ export function EscaneoCamara() {
       if (!res.ok) {
         throw new Error(json.error ?? "Error desconocido");
       }
-      setRespuesta(json);
-      setPaso("ok");
+      withTransition(() => {
+        setRespuesta(json);
+        setPaso("ok");
+      });
     } catch (e: unknown) {
       const mensaje = e instanceof Error ? e.message : "Algo salió mal";
-      setError(mensaje);
-      setPaso("error");
+      withTransition(() => {
+        setError(mensaje);
+        setPaso("error");
+      });
     }
   }
 
   function reset() {
-    setPreviewFrente(null);
-    setPreviewTabla(null);
-    setRespuesta(null);
-    setError(null);
-    setPaso("frente");
+    withTransition(() => {
+      setPreviewFrente(null);
+      setPreviewTabla(null);
+      setRespuesta(null);
+      setError(null);
+      setPaso("frente");
+    });
     if (inputFrenteRef.current) inputFrenteRef.current.value = "";
     if (inputTablaRef.current) inputTablaRef.current.value = "";
   }
 
   function saltarFrente() {
-    setPaso("tabla");
+    withTransition(() => setPaso("tabla"));
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div
+      className="flex flex-col gap-6 w-full"
+      style={{ viewTransitionName: "escaneo" }}
+    >
       <input
         ref={inputFrenteRef}
         type="file"
-        accept="image/*"
+        accept={ACCEPT_IMAGES}
         capture="environment"
         className="sr-only"
+        aria-label="Foto del frente del envase"
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) void tomarFotoFrente(f);
@@ -107,9 +139,10 @@ export function EscaneoCamara() {
       <input
         ref={inputTablaRef}
         type="file"
-        accept="image/*"
+        accept={ACCEPT_IMAGES}
         capture="environment"
         className="sr-only"
+        aria-label="Foto de la tabla nutricional"
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) void tomarFotoTablaYEnviar(f);
@@ -223,19 +256,24 @@ export function EscaneoCamara() {
 
       {/* Procesando */}
       {paso === "procesando" && (
-        <div className="rounded-3xl border border-[color:var(--color-line)] bg-white/80 backdrop-blur p-6 text-center">
+        <div
+          role="status"
+          aria-busy="true"
+          aria-live="polite"
+          className="rounded-3xl border border-[color:var(--color-line)] bg-white/80 backdrop-blur p-6 text-center"
+        >
           <div className="flex gap-2 justify-center mb-4">
             {previewFrente && (
               <img
                 src={previewFrente}
-                alt="Frente"
+                alt="Vista previa del frente"
                 className="h-24 rounded-xl ring-1 ring-stone-200"
               />
             )}
             {previewTabla && (
               <img
                 src={previewTabla}
-                alt="Tabla"
+                alt="Vista previa de la tabla nutricional"
                 className="h-24 rounded-xl ring-1 ring-stone-200"
               />
             )}
@@ -249,11 +287,17 @@ export function EscaneoCamara() {
 
       {/* Error */}
       {paso === "error" && (
-        <div className="rounded-3xl border border-red-200 bg-red-50/90 backdrop-blur p-6 text-center">
+        <div
+          role="alert"
+          className="rounded-3xl border border-red-200 bg-red-50/90 backdrop-blur p-6 text-center"
+        >
           <p className="text-red-800 font-medium">{error}</p>
           <button
             type="button"
             onClick={reset}
+            ref={(el) => {
+              if (el) el.focus();
+            }}
             className="mt-4 rounded-full bg-stone-900 px-5 py-2.5 text-white text-sm font-medium hover:bg-stone-800 transition"
           >
             Probar de nuevo
@@ -263,16 +307,21 @@ export function EscaneoCamara() {
 
       {/* OK */}
       {paso === "ok" && respuesta && (
-        <>
+        <section aria-live="polite" aria-label="Resultado del escaneo">
           <Resultado {...respuesta} />
-          <button
-            type="button"
-            onClick={reset}
-            className="rounded-full bg-stone-900 px-5 py-3 text-white text-sm font-medium hover:bg-stone-800 transition self-center"
-          >
-            Escanear otro producto
-          </button>
-        </>
+          <div className="flex justify-center mt-6">
+            <button
+              type="button"
+              onClick={reset}
+              ref={(el) => {
+                if (el) el.focus();
+              }}
+              className="rounded-full bg-stone-900 px-5 py-3 text-white text-sm font-medium hover:bg-stone-800 transition"
+            >
+              Escanear otro producto
+            </button>
+          </div>
+        </section>
       )}
     </div>
   );

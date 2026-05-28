@@ -33,3 +33,25 @@ body {
 details > summary { list-style: none; cursor: pointer; }
 details > summary::-webkit-details-marker { display: none; }
 details[open] .faq-chevron { transform: rotate(45deg); }
+
+/* View Transitions: crossfade suave entre los pasos del escaneo */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(escaneo),
+  ::view-transition-new(escaneo) {
+    animation-duration: 0.32s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(escaneo) {
+    animation-name: et-fade-out;
+  }
+  ::view-transition-new(escaneo) {
+    animation-name: et-fade-in;
+  }
+}
+
+@keyframes et-fade-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes et-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
