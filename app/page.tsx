@@ -31,26 +31,6 @@ export default function Home() {
           Hecho para defender el derecho a saber qué comemos. Basado en el
           perfil de nutrientes OPS, Ley 27.642 y Decreto 151/2022.
         </p>
-        <p className="text-stone-400">
-          Código abierto ·{" "}
-          <a
-            href="https://github.com/"
-            rel="noopener noreferrer"
-            target="_blank"
-            className="underline hover:text-stone-700"
-          >
-            Mirá el repo
-          </a>{" "}
-          · Hecho por{" "}
-          <a
-            href="https://cafecito.app/rodolofpardo"
-            rel="noopener noreferrer"
-            target="_blank"
-            className="underline hover:text-stone-700"
-          >
-            Rodolfo Pardo
-          </a>
-        </p>
       </footer>
     </main>
   );
