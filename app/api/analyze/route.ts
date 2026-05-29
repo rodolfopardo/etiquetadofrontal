@@ -173,6 +173,19 @@ function parseDataUrl(dataUrl: string): ImagenEntrante | null {
 }
 
 export async function POST(req: Request) {
+  // Kill-switch global: poné SCAN_PAUSED=true en Vercel para pausar el escáner
+  // al instante (sin redeploy) y dejar de gastar IA. Borrala para reactivar.
+  if (process.env.SCAN_PAUSED === "true") {
+    return NextResponse.json(
+      {
+        error:
+          "El escáner está en pausa por mantenimiento. Volvé en un ratito 🙏",
+        paused: true,
+      },
+      { status: 503 },
+    );
+  }
+
   const ip = getClientIp(req);
   const rl = rateLimit(ip);
   if (!rl.ok) {

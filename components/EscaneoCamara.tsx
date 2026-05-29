@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { compressImage } from "@/lib/image";
+import { trackEvent } from "@/lib/analytics";
 import { Resultado } from "./Resultado";
 import type {
   DatosNutricionales,
@@ -73,6 +74,8 @@ export function EscaneoCamara() {
   async function tomarFotoTablaYEnviar(file: File) {
     setError(null);
     withTransition(() => setPaso("procesando"));
+    // Cuenta cada escaneo enviado al modelo (proxy del costo de IA).
+    trackEvent("escaneo_enviado", { con_frente: Boolean(previewFrente) });
     try {
       const dataUrlTabla = await compressImage(file);
       setPreviewTabla(dataUrlTabla);
@@ -90,12 +93,17 @@ export function EscaneoCamara() {
       if (!res.ok) {
         throw new Error(json.error ?? "Error desconocido");
       }
+      trackEvent("escaneo_completado", {
+        octogonos: json?.resultado?.octogonos?.length ?? 0,
+        categoria: json?.datos?.categoria ?? "desconocida",
+      });
       withTransition(() => {
         setRespuesta(json);
         setPaso("ok");
       });
     } catch (e: unknown) {
       const mensaje = e instanceof Error ? e.message : "Algo salió mal";
+      trackEvent("escaneo_error", { motivo: mensaje });
       withTransition(() => {
         setError(mensaje);
         setPaso("error");
