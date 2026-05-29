@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   description: DESCRIPTION,
   applicationName: "Etiquetado Frontal",
-  authors: [{ name: "Rodolfo Pardo", url: "https://cafecito.app/rodolofpardo" }],
+  authors: [{ name: "Rodolfo Pardo" }],
   creator: "Rodolfo Pardo",
   keywords: [
     "Ley 27.642",
@@ -121,7 +121,6 @@ const JSON_LD = {
       "@type": "Person",
       "@id": `${siteUrl.origin}/#person`,
       name: "Rodolfo Pardo",
-      url: "https://cafecito.app/rodolofpardo",
     },
   ],
 };

@@ -1,6 +1,6 @@
 import { EscaneoCamara } from "@/components/EscaneoCamara";
 import { FAQ } from "@/components/FAQ";
-import { Cafecito } from "@/components/Cafecito";
+import { Compartir } from "@/components/Compartir";
 
 export default function Home() {
   return (
@@ -22,7 +22,7 @@ export default function Home() {
 
       <EscaneoCamara />
 
-      <Cafecito variant="card" />
+      <Compartir />
 
       <FAQ />
 
